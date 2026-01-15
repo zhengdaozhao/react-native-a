@@ -1,14 +1,7 @@
-import React from 'react';
-import {StyleSheet, View, ActivityIndicator} from 'react-native';
-import {AppProvider, UserProvider, RealmProvider} from '@realm/react';
-import {appId, baseUrl} from '../atlasConfig.json';
-
-import {App} from './App';
-import {WelcomeView} from './WelcomeView';
-
-import {Item} from './ItemSchema';
-import { Initdson } from './InitdsonSchema';
-import { Writing } from './WritingSchema';
+import React, { useState } from 'react';
+import { StyleSheet, View, ActivityIndicator } from 'react-native';
+import { App } from './App';
+import { WelcomeView } from './WelcomeView';
 
 const LoadingIndicator = () => {
   return (
@@ -19,31 +12,32 @@ const LoadingIndicator = () => {
 };
 
 export const AppWrapper = () => {
-  return (
-    <AppProvider id={appId} baseUrl={baseUrl}>
-      <UserProvider fallback={WelcomeView}>
-        <RealmProvider
-          schema={[Item,Initdson,Writing]}
-          sync={{
-            flexible: true,
-            onError: (_session, error) => {
-              // Show sync errors in the console
-              console.error(error);
-            },
-          }}
-          fallback={LoadingIndicator}>
-          <App />
-        </RealmProvider>
-      </UserProvider>
-    </AppProvider>
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = (userData: any) => {
+    setUser(userData);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+  };
+
+  if (loading) {
+    return <LoadingIndicator />;
+  }
+
+  return user ? (
+    <App user={user} onLogout={handleLogout} />
+  ) : (
+    <WelcomeView onLogin={handleLogin} />
   );
 };
 
 const styles = StyleSheet.create({
   activityContainer: {
     flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'center',
     padding: 10,
   },
 });

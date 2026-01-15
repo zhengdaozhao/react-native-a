@@ -1,16 +1,11 @@
 import React, {useCallback} from 'react';
 import {Pressable, Alert, View, Text, StyleSheet} from 'react-native';
-import {useUser} from '@realm/react';
 import {colors} from './Colors';
 
-export function LogoutButton() {
-  const user = useUser();
-
-  // The signOut function calls the logOut function on the currently
-  // logged in user and then navigates to the welcome screen
+export function LogoutButton({ onLogout }) {
   const signOut = useCallback(() => {
-    user?.logOut();
-  }, [user]);
+    onLogout?.();
+  }, [onLogout]);
 
   return (
     <Pressable

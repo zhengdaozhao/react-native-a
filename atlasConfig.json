@@ -5,5 +5,6 @@
     "clientApiBaseUrl": "https://eastasia.azure.services.cloud.mongodb.com",    
     "dataApiBaseUrl": "https://eastasia.azure.data.mongodb-api.com",    
     "dataExplorerLink": "https://cloud.mongodb.com/links/642a7f2704702f66618f5b58/explorer/zpddyz/database/collection/find",
-    "dataSourceName": "mongodb-atlas"
+    "dataSourceName": "mongodb-atlas",
+    "dataApiKey": "12ae40a9-27e1-4bec-a579-ca8c32f3790f"
 }
