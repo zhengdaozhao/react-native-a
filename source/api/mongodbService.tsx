@@ -1,9 +1,11 @@
 import axios, { AxiosInstance } from 'axios';
+import atlasConfig from '../atlasConfig.json';
 
-// 配置信息
+// 配置信息 - 从 MongoDB Atlas 获取
 const CONFIG = {
-  dataApiBaseUrl: 'https://data.mongodb-api.com/app/YOUR_APP_ID/endpoint', // 替换为你的 App ID
-  apiKey: 'YOUR_DATA_API_KEY', // 替换为你的 API Key
+  // 格式: https://data.mongodb-api.com/app/{APP_ID}/endpoint/data/v1
+  dataApiBaseUrl: `${atlasConfig.dataApiBaseUrl}/app/${atlasConfig.appId}/endpoint/data/v1`,
+  apiKey: '12ae40a9-27e1-4bec-a579-ca8c32f3790f', // 在 Atlas 中创建的 API Key
   database: 'zpddyz',
 };
 
@@ -14,9 +16,11 @@ class MongoDBService {
     this.client = axios.create({
       baseURL: CONFIG.dataApiBaseUrl,
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/ejson',
+        'Access-Control-Request-Headers': '*',
         'api-key': CONFIG.apiKey,
       },
+      timeout: 10000,
     });
   }
 
@@ -25,8 +29,9 @@ class MongoDBService {
       const response = await this.client.post(`/action/${action}`, payload);
       return response.data;
     } catch (error: any) {
-      console.error(`MongoDB API Error (${action}):`, error.response?.data || error.message);
-      throw error;
+      const errorMessage = error.response?.data?.error || error.message;
+      console.error(`MongoDB API Error (${action}):`, errorMessage);
+      throw new Error(`API Error: ${errorMessage}`);
     }
   }
 
@@ -57,6 +62,17 @@ class MongoDBService {
     });
   }
 
+  async insertMany(collection: string, documents: any[]) {
+    return this.callAPI('insertMany', {
+      database: CONFIG.database,
+      collection,
+      documents: documents.map(doc => ({
+        ...doc,
+        createdAt: new Date().toISOString(),
+      })),
+    });
+  }
+
   async update(collection: string, filter: any, update: any) {
     return this.callAPI('updateOne', {
       database: CONFIG.database,
@@ -66,8 +82,33 @@ class MongoDBService {
     });
   }
 
+  async updateMany(collection: string, filter: any, update: any) {
+    return this.callAPI('updateMany', {
+      database: CONFIG.database,
+      collection,
+      filter,
+      update: { $set: update },
+    });
+  }
+
   async delete(collection: string, filter: any) {
     return this.callAPI('deleteOne', {
+      database: CONFIG.database,
+      collection,
+      filter,
+    });
+  }
+
+  async deleteMany(collection: string, filter: any) {
+    return this.callAPI('deleteMany', {
+      database: CONFIG.database,
+      collection,
+      filter,
+    });
+  }
+
+  async count(collection: string, filter: any = {}) {
+    return this.callAPI('count', {
       database: CONFIG.database,
       collection,
       filter,
