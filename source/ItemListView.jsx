@@ -3,10 +3,11 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Alert, FlatList, StyleSheet, Switch, Text, View } from 'react-native';
 import { ListItem } from '@rneui/base';
 import { mongodbService } from './api/mongodbService';
+import { Initdson } from './types';
 import { colors } from './Colors';
 
 export function ItemListView({ navigation, route }) {
-  const [dsons, setDsons] = useState([]);
+  const [dsons, setDsons] = useState<Initdson[]>([]);
   const [loading, setLoading] = useState(false);
   const [showAllItems, setShowAllItems] = useState(true);
   const userEmail = 'user@example.com'; // 从认证获取
@@ -15,7 +16,7 @@ export function ItemListView({ navigation, route }) {
     setLoading(true);
     try {
       const filter = showAllItems ? {} : { username: userEmail };
-      const result = await mongodbService.query('initdson', filter);
+      const result = await mongodbService.query<Initdson>('initdson', filter);
       setDsons(result.documents || []);
     } catch (error) {
       Alert.alert('Error', '获取数据失败: ' + error.message);
@@ -32,7 +33,7 @@ export function ItemListView({ navigation, route }) {
   }, [fetchDsons, navigation]);
 
   const renderItem = useCallback(
-    ({ item }) => {
+    ({ item }: { item: Initdson }) => {
       try {
         const allsub = JSON.parse(item.allsub);
         const subKey = String(allsub[0]?.key || '');
@@ -74,7 +75,7 @@ export function ItemListView({ navigation, route }) {
           />
         </View>
         <FlatList
-          keyExtractor={(item) => item._id}
+          keyExtractor={(item) => item._id || ''}
           data={dsons}
           renderItem={renderItem}
           refreshing={loading}

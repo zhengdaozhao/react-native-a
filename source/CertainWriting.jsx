@@ -3,17 +3,18 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 import { ListItem } from '@rneui/base';
 import { mongodbService } from './api/mongodbService';
+import { Writing } from './types';
 import { colors } from './Colors';
 
 export function CertainWriting({ navigation, route }) {
   const { subject } = route.params;
-  const [writings, setWritings] = useState([]);
+  const [writings, setWritings] = useState<Writing[]>([]);
   const [loading, setLoading] = useState(false);
 
   const fetchWritings = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await mongodbService.query('writing', {
+      const result = await mongodbService.query<Writing>('writing', {
         subject: subject,
       });
       setWritings(result.documents || []);
@@ -36,7 +37,7 @@ export function CertainWriting({ navigation, route }) {
   }, [fetchWritings, navigation]);
 
   const renderItem = useCallback(
-    ({ item }) => (
+    ({ item }: { item: Writing }) => (
       <ListItem
         key={item._id}
         bottomDivider
@@ -62,7 +63,7 @@ export function CertainWriting({ navigation, route }) {
       <View style={styles.viewWrapper}>
         <Text style={styles.subjectTitle}>{subject}</Text>
         <FlatList
-          keyExtractor={(item) => item._id}
+          keyExtractor={(item) => item._id || ''}
           data={writings}
           renderItem={renderItem}
           refreshing={loading}

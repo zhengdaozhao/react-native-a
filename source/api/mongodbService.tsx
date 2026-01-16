@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import atlasConfig from '../atlasConfig.json';
+import { ApiResponse } from '../types';
 
 // 配置信息 - 从 MongoDB Atlas 获取
 const CONFIG = {
@@ -24,7 +25,7 @@ class MongoDBService {
     });
   }
 
-  private async callAPI(action: string, payload: any) {
+  private async callAPI<T>(action: string, payload: any): Promise<ApiResponse<T>> {
     try {
       const response = await this.client.post(`/action/${action}`, payload);
       return response.data;
@@ -35,24 +36,24 @@ class MongoDBService {
     }
   }
 
-  async query(collection: string, filter: any = {}) {
-    return this.callAPI('find', {
+  async query<T>(collection: string, filter: any = {}): Promise<ApiResponse<T>> {
+    return this.callAPI<T>('find', {
       database: CONFIG.database,
       collection,
       filter,
     });
   }
 
-  async queryOne(collection: string, filter: any) {
-    return this.callAPI('findOne', {
+  async queryOne<T>(collection: string, filter: any): Promise<ApiResponse<T>> {
+    return this.callAPI<T>('findOne', {
       database: CONFIG.database,
       collection,
       filter,
     });
   }
 
-  async insert(collection: string, document: any) {
-    return this.callAPI('insertOne', {
+  async insert<T>(collection: string, document: T): Promise<ApiResponse<T>> {
+    return this.callAPI<T>('insertOne', {
       database: CONFIG.database,
       collection,
       document: {
@@ -62,8 +63,8 @@ class MongoDBService {
     });
   }
 
-  async insertMany(collection: string, documents: any[]) {
-    return this.callAPI('insertMany', {
+  async insertMany<T>(collection: string, documents: T[]): Promise<ApiResponse<T>> {
+    return this.callAPI<T>('insertMany', {
       database: CONFIG.database,
       collection,
       documents: documents.map(doc => ({
@@ -73,8 +74,8 @@ class MongoDBService {
     });
   }
 
-  async update(collection: string, filter: any, update: any) {
-    return this.callAPI('updateOne', {
+  async update<T>(collection: string, filter: any, update: Partial<T>): Promise<ApiResponse<T>> {
+    return this.callAPI<T>('updateOne', {
       database: CONFIG.database,
       collection,
       filter,
@@ -82,8 +83,8 @@ class MongoDBService {
     });
   }
 
-  async updateMany(collection: string, filter: any, update: any) {
-    return this.callAPI('updateMany', {
+  async updateMany<T>(collection: string, filter: any, update: Partial<T>): Promise<ApiResponse<T>> {
+    return this.callAPI<T>('updateMany', {
       database: CONFIG.database,
       collection,
       filter,
@@ -91,7 +92,7 @@ class MongoDBService {
     });
   }
 
-  async delete(collection: string, filter: any) {
+  async delete(collection: string, filter: any): Promise<ApiResponse<any>> {
     return this.callAPI('deleteOne', {
       database: CONFIG.database,
       collection,
@@ -99,7 +100,7 @@ class MongoDBService {
     });
   }
 
-  async deleteMany(collection: string, filter: any) {
+  async deleteMany(collection: string, filter: any): Promise<ApiResponse<any>> {
     return this.callAPI('deleteMany', {
       database: CONFIG.database,
       collection,
@@ -107,7 +108,7 @@ class MongoDBService {
     });
   }
 
-  async count(collection: string, filter: any = {}) {
+  async count(collection: string, filter: any = {}): Promise<ApiResponse<any>> {
     return this.callAPI('count', {
       database: CONFIG.database,
       collection,
